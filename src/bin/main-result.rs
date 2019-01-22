@@ -1,4 +1,6 @@
-use failure::{Error, err_msg, ResultExt};
+#[macro_use] extern crate failure;
+
+use failure::{Error, ResultExt};
 
 fn main() -> Result<(), Error> {
     run_foo().context("foo failed")?;
@@ -11,5 +13,5 @@ fn run_foo() -> Result<(), Error> {
 }
 
 fn run_bar() -> Result<(), Error> {
-    Err(err_msg("something really bad happened"))
+    bail!("something really bad happened")
 }

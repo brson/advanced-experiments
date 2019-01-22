@@ -1,4 +1,6 @@
-use failure::{Error, err_msg, ResultExt};
+#[macro_use] extern crate failure;
+
+use failure::{Error, ResultExt};
 use std::process;
 
 fn main() {
@@ -27,5 +29,5 @@ fn run_foo() -> Result<(), Error> {
 }
 
 fn run_bar() -> Result<(), Error> {
-    Err(err_msg("something really bad happened"))
+    bail!("something really bad happened")
 }
