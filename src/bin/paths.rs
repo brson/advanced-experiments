@@ -1,5 +1,9 @@
 #![allow(warnings)]
 
+// Testing uniform paths in 2018.
+// We expect to see consistency between imports and expressions
+// in all locations.
+
 mod a {
     pub struct A1;
     pub struct A2;
@@ -16,23 +20,23 @@ use crate::a::A4;
 fn f1() {
     let _ = a::A1;
     #[cfg(feature = "rust-2015")]
-    let _ = ::a::A2; // incorrect error message? #57849
+    let _ = ::a::A2;
     let _ = self::a::A3;
     let _ = crate::a::A4;
 }
 
-extern crate failure;
+extern crate pandoc_types;
 
-use failure::Error;
-use ::failure::Backtrace;
-use self::failure::Causes;
-use crate::failure::Compat;
+use pandoc_types::definition::Alignment;
+use ::pandoc_types::definition::Block;
+use self::pandoc_types::definition::Inline;
+use crate::pandoc_types::definition::MathType;
 
-fn f3() {
-    let _ = failure::Error;
-    let _ = ::failure::Backtrace;
-    let _ = self::failure::Causes;
-    let _ = crate::failure::Compat;
+fn f2() {
+    let _ = pandoc_types::definition::Alignment::AlignLeft;
+    let _ = ::pandoc_types::definition::Block::Null;
+    let _ = self::pandoc_types::definition::Inline::Space;
+    let _ = crate::pandoc_types::definition::MathType::DisplayMath;
 }
 
 struct B1;
@@ -78,7 +82,7 @@ mod c {
     use crate::c::d::D5;
 
     fn f2() {
-        // works in neither edition (thus inconsistent in 2015)
+        // works in neither edition (thus inconsistent with 'use' in 2015)
         // let _ = c::d::D1;
         #[cfg(feature = "rust-2015")]
         let _ = ::c::d::D2;
@@ -87,12 +91,18 @@ mod c {
         let _ = crate::c::d::D5;
     }
 
-    use failure::Error;
-    use ::failure::Backtrace;
-    use self::super::failure::Causes;
-    use crate::failure::Compat;
+    use pandoc_types::definition::Alignment;
+    use ::pandoc_types::definition::Block;
+    use self::super::pandoc_types::definition::Inline;
+    use super::pandoc_types::definition::QuoteType;
+    use crate::pandoc_types::definition::MathType;
 
-    fn f2() {
+    fn f3() {
+        let _ = pandoc_types::definition::Alignment::AlignLeft;
+        let _ = ::pandoc_types::definition::Block::Null;
+        let _ = self::super::pandoc_types::definition::Inline::Space;
+        let _ = super::pandoc_types::definition::QuoteType::SingleQuote;
+        let _ = crate::pandoc_types::definition::MathType::DisplayMath;
     }
 }
 
@@ -106,16 +116,23 @@ mod e { pub mod f { pub struct F1; } }
 
 // resolution of name conflicts
 mod g {
-    mod failure {
-        pub struct Error;
-        pub struct MyError;
-    }
+    mod pandoc_types { pub mod definition {
+        pub enum Alignment { AlignLeft, Blah }
+        pub enum MyAlignment { AlignLeft, Blah }
+    } }
 
     // root takes precedence in 2015; ambiguous in 2018
     #[cfg(feature = "rust-2015")]
-    use failure::Error;
-    // use failure::MyError;
-    use self::failure::MyError;
+    use pandoc_types::definition::Alignment;
+    // use pandoc_types::definition::MyAlignment;
+    use self::pandoc_types::definition::MyAlignment;
+
+    fn f1() {
+        // _local scope_ takes precedence (inconsistent in 2018!)
+        let _ = pandoc_types::definition::Alignment::Blah;
+        // use pandoc_types::definition::MyAlignment;
+        let _ = self::pandoc_types::definition::MyAlignment::AlignLeft;
+    }
 }
 
 
