@@ -1,7 +1,7 @@
 #![allow(warnings)]
 
 // Testing uniform paths in 2018.
-// We expect to see consistency between imports and expressions
+// I expect to see consistency between imports and expressions
 // in all locations.
 
 mod a {
@@ -55,8 +55,8 @@ mod c {
     use super::B4;
     use crate::B5;
 
-    fn f1() {
-        #[cfg(feature = "rust-2015")]
+    fn f1() { 
+       #[cfg(feature = "rust-2015")]
         let _ = B1;
         #[cfg(feature = "rust-2015")]
         let _ = ::B2;
@@ -82,7 +82,8 @@ mod c {
     use crate::c::d::D5;
 
     fn f2() {
-        // works in neither edition (thus inconsistent with 'use' in 2015)
+        // works in neither edition
+        // inconsistent with 'use' in 2015, consistent in 2018
         // let _ = c::d::D1;
         #[cfg(feature = "rust-2015")]
         let _ = ::c::d::D2;
@@ -118,22 +119,27 @@ mod e { pub mod f { pub struct F1; } }
 mod g {
     mod pandoc_types { pub mod definition {
         pub enum Alignment { AlignLeft, Blah }
-        pub enum MyAlignment { AlignLeft, Blah }
+        pub enum MyAlignment1 { AlignLeft, Blah }
+        pub enum MyAlignment2 { AlignLeft, Blah }
     } }
 
-    // root takes precedence in 2015; ambiguous in 2018
+    // root takes precedence in 2015;
+    // ambiguous in 2018
     #[cfg(feature = "rust-2015")]
     use pandoc_types::definition::Alignment;
-    // use pandoc_types::definition::MyAlignment;
-    use self::pandoc_types::definition::MyAlignment;
+    // failed crate-root resolution in 2015, ambiguous in 2018
+    //use pandoc_types::definition::MyAlignment1;
+    use self::pandoc_types::definition::MyAlignment2;
 
     fn f1() {
-        // _local scope_ takes precedence (inconsistent in 2018!)
+        // _local scope_ takes precedence, 2015 & 2018
+        // inconsistent with 'use' in 2018
+        // https://github.com/rust-lang/rust/issues/57853
         let _ = pandoc_types::definition::Alignment::Blah;
-        // use pandoc_types::definition::MyAlignment;
-        let _ = self::pandoc_types::definition::MyAlignment::AlignLeft;
+        // local scope again, 2015 & 2018, inconsistent
+        let _ = pandoc_types::definition::MyAlignment1::AlignLeft;
+        let _ = self::pandoc_types::definition::MyAlignment2::AlignLeft;
     }
 }
-
 
 fn main() { }
