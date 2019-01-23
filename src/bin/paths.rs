@@ -108,7 +108,7 @@ mod c {
 }
 
 use c::d;
-use d::D1; // "b" is in scope
+use d::D1; // "d" is in scope
 
 // This just shows that resolution isn't in lexical (?) order
 use f::F1;
