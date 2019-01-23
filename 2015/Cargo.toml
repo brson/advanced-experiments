@@ -7,6 +7,7 @@ edition = "2015"
 [dependencies]
 
 failure = "0.1.5"
+pandoc_types = "0.2"
 quick-error = "1.2.2"
 
 [features]

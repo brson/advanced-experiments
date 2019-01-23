@@ -13,12 +13,27 @@ use ::a::A2; // :: is only for crates in 2018
 use self::a::A3;
 use crate::a::A4;
 
+fn f1() {
+    let _ = a::A1;
+    #[cfg(feature = "rust-2015")]
+    let _ = ::a::A2; // incorrect error message? #57849
+    let _ = self::a::A3;
+    let _ = crate::a::A4;
+}
+
 extern crate failure;
 
 use failure::Error;
 use ::failure::Backtrace;
 use self::failure::Causes;
 use crate::failure::Compat;
+
+fn f3() {
+    let _ = failure::Error;
+    let _ = ::failure::Backtrace;
+    let _ = self::failure::Causes;
+    let _ = crate::failure::Compat;
+}
 
 struct B1;
 struct B2;
@@ -29,15 +44,17 @@ struct B5;
 mod c {
 
     #[cfg(feature = "rust-2015")]
-    use B1;
+    use B1; // root in 2015, out of scope in 2018
     #[cfg(feature = "rust-2015")]
-    use ::B2;
+    use ::B2; // root in 2015, not a crate in 2018
     use self::super::B3;
     use super::B4;
     use crate::B5;
 
-    fn f() {
+    fn f1() {
+        #[cfg(feature = "rust-2015")]
         let _ = B1;
+        #[cfg(feature = "rust-2015")]
         let _ = ::B2;
         let _ = self::super::B3;
         let _ = super::B4;
@@ -60,10 +77,23 @@ mod c {
     use super::c::d::D4;
     use crate::c::d::D5;
 
+    fn f2() {
+        // works in neither edition (thus inconsistent in 2015)
+        // let _ = c::d::D1;
+        #[cfg(feature = "rust-2015")]
+        let _ = ::c::d::D2;
+        let _ = self::d::D3;
+        let _ = super::c::d::D4;
+        let _ = crate::c::d::D5;
+    }
+
     use failure::Error;
     use ::failure::Backtrace;
     use self::super::failure::Causes;
     use crate::failure::Compat;
+
+    fn f2() {
+    }
 }
 
 use c::d;
